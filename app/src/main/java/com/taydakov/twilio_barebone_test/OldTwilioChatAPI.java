@@ -23,7 +23,7 @@ public class OldTwilioChatApi implements ChatApi {
     private String token;
     private Context context;
     private TwilioIPMessagingClient ipmClient;
-    private DumbIPMessagingClientListener ipmClientListener;
+    private IPMessagingClientListener ipmClientListener;
 
     public OldTwilioChatApi(final Context context, final String token) {
         this.token = token;
@@ -65,7 +65,7 @@ public class OldTwilioChatApi implements ChatApi {
                 eventListener.onError(s);
             }
         });
-        ipmClientListener = new DumbIPMessagingClientListener();
+        ipmClientListener = new DumbOldIPMessagingClientListener();
         ipmClient = TwilioIPMessagingSDK.createIPMessagingClientWithAccessManager(accessManager, ipmClientListener);
         eventListener.onSuccess();
     }
@@ -121,7 +121,7 @@ public class OldTwilioChatApi implements ChatApi {
     }
 }
 
-class DumbIPMessagingClientListener implements IPMessagingClientListener {
+class DumbOldIPMessagingClientListener implements IPMessagingClientListener {
     public static final String TAG = "DumbIPMClientListener";
 
     @Override

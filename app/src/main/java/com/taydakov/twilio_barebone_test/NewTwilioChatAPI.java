@@ -11,6 +11,7 @@ import com.twilio.ipmessaging.IPMessagingClientListener;
 import com.twilio.ipmessaging.Messages;
 import com.twilio.ipmessaging.TwilioIPMessagingClient;
 import com.twilio.ipmessaging.TwilioIPMessagingSDK;
+import com.twilio.ipmessaging.UserInfo;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,6 +21,7 @@ public class NewTwilioChatApi implements ChatApi {
 
     private String token;
     private TwilioIPMessagingClient ipmClient;
+    private IPMessagingClientListener ipmClientListener;
 
     public NewTwilioChatApi(final String token) {
         this.token = token;
@@ -76,14 +78,12 @@ public class NewTwilioChatApi implements ChatApi {
             }
         };
         TwilioIPMessagingClient.Properties clientProps = new TwilioIPMessagingClient.Properties(
-                TwilioIPMessagingClient.SynchronizationStrategy.ALL,
+                TwilioIPMessagingClient.SynchronizationStrategy.CHANNELS_LIST,
                 50
         );
         Constants.CallbackListener<TwilioIPMessagingClient> listener = new Constants.CallbackListener<TwilioIPMessagingClient>() {
             @Override
             public void onSuccess(TwilioIPMessagingClient twilioIPMessagingClient) {
-                ipmClient = twilioIPMessagingClient;
-                eventListener.onSuccess();
             }
 
             @Override
@@ -92,23 +92,14 @@ public class NewTwilioChatApi implements ChatApi {
                 eventListener.onError(errorInfo.getErrorText());
             }
         };
-        TwilioIPMessagingSDK.createClient(accessManager, clientProps, listener);
+        ipmClientListener = new DumbNewIPMessagingClientListener(eventListener);
+        ipmClient = TwilioIPMessagingSDK.createClient(accessManager, clientProps, listener);
+        ipmClient.setListener(ipmClientListener);
     }
 
     @Override
     public void retrieveChannels(final IChatEventListener eventListener) {
-        ipmClient.getChannels().loadChannelsWithListener(new Constants.StatusListener() {
-            @Override
-            public void onSuccess() {
-                eventListener.onSuccess();
-            }
-
-            @Override
-            public void onError(ErrorInfo errorInfo) {
-                super.onError(errorInfo);
-                eventListener.onError(errorInfo.getErrorText());
-            }
-        });
+        eventListener.onSuccess();
     }
 
     @Override
@@ -123,9 +114,21 @@ public class NewTwilioChatApi implements ChatApi {
 
     @Override
     public void retrieveMessages(final String channelName, final IChatEventListener eventListener) {
-        Messages messagesObject = ipmClient.getChannels().getChannelByUniqueName(channelName).getMessages();
-        Log.d(TAG, "Number of messages is " + messagesObject.getMessages().length);
-        eventListener.onSuccess();
+        Channel.SynchronizationStatus status = ipmClient.getChannels().getChannelByUniqueName(channelName).getSynchronizationStatus();
+        ipmClient.getChannels().getChannelByUniqueName(channelName).synchronize(new Constants.CallbackListener<Channel>() {
+            @Override
+            public void onSuccess(Channel channel) {
+                Messages messagesObject = ipmClient.getChannels().getChannelByUniqueName(channelName).getMessages();
+                Log.d(TAG, "Number of messages is " + messagesObject.getMessages().length);
+                eventListener.onSuccess();
+            }
+
+            @Override
+            public void onError(ErrorInfo errorInfo) {
+                super.onError(errorInfo);
+                eventListener.onError(errorInfo.getErrorText());
+            }
+        });
     }
 
     @Override
@@ -143,5 +146,58 @@ public class NewTwilioChatApi implements ChatApi {
                 eventListener.onError(errorInfo.getErrorText());
             }
         });
+    }
+}
+
+class DumbNewIPMessagingClientListener implements IPMessagingClientListener {
+    public static final String TAG = "DumbIPMClientListener";
+
+    private IChatEventListener listener;
+
+    public DumbNewIPMessagingClientListener(IChatEventListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void onClientSynchronization(TwilioIPMessagingClient.SynchronizationStatus synchronizationStatus) {
+        Log.d(TAG, "Client synchronized, status is " + synchronizationStatus.name());
+        if (synchronizationStatus == TwilioIPMessagingClient.SynchronizationStatus.COMPLETED) {
+            listener.onSuccess();
+        }
+    }
+
+    @Override
+    public void onChannelAdd(Channel channel) {
+        Log.d(TAG, "Channel added, " + channel.getUniqueName());
+    }
+
+    @Override
+    public void onChannelChange(Channel channel) {
+        Log.d(TAG, "Channel changed, " + channel.getUniqueName());
+    }
+
+    @Override
+    public void onChannelDelete(Channel channel) {
+        Log.d(TAG, "Channel deleted, " + channel.getUniqueName());
+    }
+
+    @Override
+    public void onError(ErrorInfo errorInfo) {
+
+    }
+
+    @Override
+    public void onAttributesChange(String s) {
+
+    }
+
+    @Override
+    public void onChannelHistoryLoaded(Channel channel) {
+        Log.d(TAG, "Channel history loaded, " + channel.getUniqueName());
+    }
+
+    @Override
+    public void onUserInfoChange(UserInfo userInfo) {
+
     }
 }

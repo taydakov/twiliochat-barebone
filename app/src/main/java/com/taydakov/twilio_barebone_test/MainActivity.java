@@ -7,7 +7,7 @@ import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
-    private static final String CHANNEL_NAME = "nick-lev-test";
+    private static final String CHANNEL_NAME = "private-coach-4-3";
 
     private ChatApi chatAPI;
 
