@@ -1,13 +1,13 @@
 package com.taydakov.twilio_barebone_test;
 
-public interface IChatAPI {
-    void Initialize(IChatEventListener eventListener);
+public interface ChatApi {
+    void initialize(IChatEventListener eventListener);
 
-    void RetrieveChannels(IChatEventListener eventListener);
+    void retrieveChannels(IChatEventListener eventListener);
 
-    String[] GetChannels();
+    String[] getChannels();
 
-    void RetrieveMessages(String channelName, IChatEventListener eventListener);
+    void retrieveMessages(String channelName, IChatEventListener eventListener);
 
-    void SendMessage(String message, IChatEventListener eventListener);
+    void sendMessage(String message, IChatEventListener eventListener);
 }

@@ -16,15 +16,15 @@ import com.twilio.ipmessaging.UserInfo;
 
 import java.util.ArrayList;
 
-public class OldTwilioChatAPI implements IChatAPI {
+public class OldTwilioChatApi implements ChatApi {
     public static final String TAG = "OldTwilioChatAPI";
 
     private String token;
     private Context context;
     private TwilioIPMessagingClient ipmClient;
-    private IPMClientListener ipmClientListener;
+    private DumbIPMessagingClientListener ipmClientListener;
 
-    public OldTwilioChatAPI(final Context context, final String token) {
+    public OldTwilioChatApi(final Context context, final String token) {
         this.token = token;
         this.context = context;
 
@@ -33,11 +33,11 @@ public class OldTwilioChatAPI implements IChatAPI {
     }
 
     @Override
-    public void Initialize(final IChatEventListener eventListener) {
+    public void initialize(final IChatEventListener eventListener) {
         TwilioIPMessagingSDK.initializeSDK(context, new Constants.InitListener() {
             @Override
             public void onInitialized() {
-                InitializeAccessManager(eventListener);
+                initializeAccessManager(eventListener);
             }
 
             @Override
@@ -47,7 +47,7 @@ public class OldTwilioChatAPI implements IChatAPI {
         });
     }
 
-    private void InitializeAccessManager(final IChatEventListener eventListener) {
+    private void initializeAccessManager(final IChatEventListener eventListener) {
         TwilioAccessManager accessManager = TwilioAccessManagerFactory.createAccessManager(token, new TwilioAccessManagerListener() {
             @Override
             public void onTokenExpired(TwilioAccessManager twilioAccessManager) {
@@ -64,13 +64,13 @@ public class OldTwilioChatAPI implements IChatAPI {
                 eventListener.onError(s);
             }
         });
-        ipmClientListener = new IPMClientListener();
+        ipmClientListener = new DumbIPMessagingClientListener();
         ipmClient = TwilioIPMessagingSDK.createIPMessagingClientWithAccessManager(accessManager, ipmClientListener);
         eventListener.onSuccess();
     }
 
     @Override
-    public void RetrieveChannels(final IChatEventListener eventListener) {
+    public void retrieveChannels(final IChatEventListener eventListener) {
         ipmClient.getChannels().loadChannelsWithListener(new Constants.StatusListener() {
             @Override
             public void onSuccess() {
@@ -86,7 +86,7 @@ public class OldTwilioChatAPI implements IChatAPI {
     }
 
     @Override
-    public String[] GetChannels() {
+    public String[] getChannels() {
         Channel[] channelObjects = ipmClient.getChannels().getChannels();
         ArrayList<String> channels = new ArrayList<>();
         for (Channel channel : channelObjects) {
@@ -96,17 +96,17 @@ public class OldTwilioChatAPI implements IChatAPI {
     }
 
     @Override
-    public void RetrieveMessages(final String channelName, final IChatEventListener eventListener) {
+    public void retrieveMessages(final String channelName, final IChatEventListener eventListener) {
 
     }
 
     @Override
-    public void SendMessage(final String message, final IChatEventListener eventListener) {
+    public void sendMessage(final String message, final IChatEventListener eventListener) {
 
     }
 }
 
-class IPMClientListener implements IPMessagingClientListener {
+class DumbIPMessagingClientListener implements IPMessagingClientListener {
     @Override
     public void onChannelAdd(Channel channel) {
 
