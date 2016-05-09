@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Chat successfully initialized");
-                RetrieveChannels();
+                retrieveChannels();
             }
 
             @Override
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void RetrieveChannels() {
+    void retrieveChannels() {
         chatAPI.retrieveChannels(new IChatEventListener() {
             @Override
             public void onSuccess() {
@@ -40,11 +40,41 @@ public class MainActivity extends AppCompatActivity {
                 String[] channels = chatAPI.getChannels();
                 String channelsListString = TextUtils.join(", ", channels);
                 Log.d(TAG, "Number of channels is " + channels.length + ": " + channelsListString);
+                retrieveMessages(channels[1]);
             }
 
             @Override
             public void onError(String message) {
                 Log.d(TAG, "Channels failed to be retrieved, error is " + message);
+            }
+        });
+    }
+
+    private void retrieveMessages(final String channelName) {
+        chatAPI.retrieveMessages(channelName, new IChatEventListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Messages retrieved successfully for " + channelName);
+                sendMessage(channelName);
+            }
+
+            @Override
+            public void onError(String message) {
+                Log.d(TAG, "Messages failed to be retrieved, error is " + message);
+            }
+        });
+    }
+
+    private void sendMessage(final String channelName) {
+        chatAPI.sendMessage(channelName, "Hello world from Twilio Barebone Test", new IChatEventListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Message has been successfully sent to " + channelName);
+            }
+
+            @Override
+            public void onError(String message) {
+                Log.d(TAG, "Message failed to send, error is " + message);
             }
         });
     }

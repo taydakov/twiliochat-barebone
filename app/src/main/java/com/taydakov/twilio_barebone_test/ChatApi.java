@@ -9,5 +9,5 @@ public interface ChatApi {
 
     void retrieveMessages(String channelName, IChatEventListener eventListener);
 
-    void sendMessage(String message, IChatEventListener eventListener);
+    void sendMessage(String channelName, String message, IChatEventListener eventListener);
 }
