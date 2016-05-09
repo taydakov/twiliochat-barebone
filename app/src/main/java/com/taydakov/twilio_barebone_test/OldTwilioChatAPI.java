@@ -30,7 +30,7 @@ public class OldTwilioChatApi implements ChatApi {
         this.context = context;
 
         Log.d(TAG, "Version of common library is " + com.twilio.common.BuildConfig.VERSION_CODE);
-        Log.d(TAG, "Version of IPM library is " + com.twilio.ipmessaging.Version.SDK_VERSION);
+        Log.d(TAG, "Version of IPM library is " + com.twilio.ipmessaging.TwilioIPMessagingSDK.getVersion());
     }
 
     @Override
