@@ -20,17 +20,19 @@ import java.util.ArrayList;
 public class OldTwilioChatApi implements ChatApi {
     public static final String TAG = "OldTwilioChatApi";
 
+    private String ipmVersion;
     private String token;
     private Context context;
     private TwilioIPMessagingClient ipmClient;
-    private IPMessagingClientListener ipmClientListener;
+    private DumbOldIPMessagingClientListener ipmClientListener;
 
     public OldTwilioChatApi(final Context context, final String token) {
         this.token = token;
         this.context = context;
 
+        this.ipmVersion = com.twilio.ipmessaging.TwilioIPMessagingSDK.getVersion();
         Log.d(TAG, "Version of common library is " + com.twilio.common.BuildConfig.VERSION_CODE);
-        Log.d(TAG, "Version of IPM library is " + com.twilio.ipmessaging.TwilioIPMessagingSDK.getVersion());
+        Log.d(TAG, "Version of IPM library is " + ipmVersion);
     }
 
     @Override
@@ -98,9 +100,38 @@ public class OldTwilioChatApi implements ChatApi {
 
     @Override
     public void retrieveMessages(final String channelName, final IChatEventListener eventListener) {
-        Messages messagesObject = ipmClient.getChannels().getChannelByUniqueName(channelName).getMessages();
-        Log.d(TAG, "Number of messages is " + messagesObject.getMessages().length);
-        eventListener.onSuccess();
+        if (ipmVersion == "0.7.0") {
+            Channel channel = ipmClient.getChannels().getChannelByUniqueName(channelName);
+            channel.synchronize(new Constants.CallbackListener<Channel>() {
+                @Override
+                public void onSuccess(Channel channel) {
+                    Messages messagesObject = channel.getMessages();
+                    Log.d(TAG, "Number of messages is " + messagesObject.getMessages().length);
+                    eventListener.onSuccess();
+                }
+
+                @Override
+                public void onError(ErrorInfo errorInfo) {
+                    super.onError(errorInfo);
+                    eventListener.onError(errorInfo.getErrorText());
+                }
+            });
+        }
+        if (ipmVersion == "0.6.0") {
+//        ipmClientListener.waitForChannel(channelName, new IChatEventListener() {
+//            @Override
+//            public void onSuccess() {
+//                Messages messagesObject = ipmClient.getChannels().getChannelByUniqueName(channelName).getMessages();
+//                Log.d(TAG, "Number of messages is " + messagesObject.getMessages().length);
+//                eventListener.onSuccess();
+//            }
+//
+//            @Override
+//            public void onError(String message) {
+//
+//            }
+//        });
+        }
     }
 
     @Override
@@ -124,9 +155,17 @@ public class OldTwilioChatApi implements ChatApi {
 class DumbOldIPMessagingClientListener implements IPMessagingClientListener {
     public static final String TAG = "DumbIPMClientListener";
 
+    private String channelNameWaitFor;
+    private IChatEventListener channelListener;
+
     @Override
     public void onClientSynchronization(TwilioIPMessagingClient.SynchronizationStatus synchronizationStatus) {
         Log.d(TAG, "Client synchronized, status is " + synchronizationStatus.name());
+    }
+
+    public void waitForChannel(final String channelName, final IChatEventListener listener) {
+        this.channelNameWaitFor = channelName;
+        this.channelListener = listener;
     }
 
     @Override
@@ -157,6 +196,11 @@ class DumbOldIPMessagingClientListener implements IPMessagingClientListener {
     @Override
     public void onChannelHistoryLoaded(Channel channel) {
         Log.d(TAG, "Channel history loaded, " + channel.getUniqueName());
+        if (channel.getUniqueName().equals(channelNameWaitFor)) {
+            channelListener.onSuccess();
+            channelListener = null;
+            channelNameWaitFor = "";
+        }
     }
 
     @Override
