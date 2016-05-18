@@ -78,7 +78,7 @@ public class NewTwilioChatApi implements ChatApi {
             }
         };
         TwilioIPMessagingClient.Properties clientProps = new TwilioIPMessagingClient.Properties(
-                TwilioIPMessagingClient.SynchronizationStrategy.ALL,
+                TwilioIPMessagingClient.SynchronizationStrategy.CHANNELS_LIST,
                 50
         );
         Constants.CallbackListener<TwilioIPMessagingClient> listener = new Constants.CallbackListener<TwilioIPMessagingClient>() {
@@ -160,44 +160,39 @@ class DumbNewIPMessagingClientListener implements IPMessagingClientListener {
 
     @Override
     public void onClientSynchronization(TwilioIPMessagingClient.SynchronizationStatus synchronizationStatus) {
-        Log.d(TAG, "Client synchronized, status is " + synchronizationStatus.name());
+        Log.d(TAG, "IPM Client synchronized, status is " + synchronizationStatus.name());
         if (synchronizationStatus == TwilioIPMessagingClient.SynchronizationStatus.COMPLETED) {
             listener.onSuccess();
         }
     }
 
     @Override
+    public void onChannelSynchronizationChange(Channel channel) {
+        Log.d(TAG, "IPM Channel sync changes, channel name is " + channel.getFriendlyName());
+    }
+
+    @Override
     public void onChannelAdd(Channel channel) {
-        Log.d(TAG, "Channel added, " + channel.getUniqueName());
+        Log.d(TAG, "IPM Channel added, " + channel.getUniqueName());
     }
 
     @Override
     public void onChannelChange(Channel channel) {
-        Log.d(TAG, "Channel changed, " + channel.getUniqueName());
+        Log.d(TAG, "IPM Channel changed, " + channel.getUniqueName());
     }
 
     @Override
     public void onChannelDelete(Channel channel) {
-        Log.d(TAG, "Channel deleted, " + channel.getUniqueName());
+        Log.d(TAG, "IPM Channel deleted, " + channel.getUniqueName());
     }
 
     @Override
     public void onError(ErrorInfo errorInfo) {
-
-    }
-
-    @Override
-    public void onAttributesChange(String s) {
-
-    }
-
-    @Override
-    public void onChannelHistoryLoaded(Channel channel) {
-        Log.d(TAG, "Channel history loaded, " + channel.getUniqueName());
+        Log.d(TAG, "IPM Error occurred");
     }
 
     @Override
     public void onUserInfoChange(UserInfo userInfo) {
-
+        Log.d(TAG, "IPM User info changed");
     }
 }

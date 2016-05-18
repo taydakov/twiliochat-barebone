@@ -10,6 +10,7 @@ import com.twilio.ipmessaging.Channel;
 import com.twilio.ipmessaging.Constants;
 import com.twilio.ipmessaging.ErrorInfo;
 import com.twilio.ipmessaging.IPMessagingClientListener;
+import com.twilio.ipmessaging.Message;
 import com.twilio.ipmessaging.Messages;
 import com.twilio.ipmessaging.TwilioIPMessagingClient;
 import com.twilio.ipmessaging.TwilioIPMessagingSDK;
@@ -102,20 +103,9 @@ public class OldTwilioChatApi implements ChatApi {
     public void retrieveMessages(final String channelName, final IChatEventListener eventListener) {
         if (ipmVersion == "0.7.0") {
             Channel channel = ipmClient.getChannels().getChannelByUniqueName(channelName);
-            channel.synchronize(new Constants.CallbackListener<Channel>() {
-                @Override
-                public void onSuccess(Channel channel) {
-                    Messages messagesObject = channel.getMessages();
-                    Log.d(TAG, "Number of messages is " + messagesObject.getMessages().length);
-                    eventListener.onSuccess();
-                }
-
-                @Override
-                public void onError(ErrorInfo errorInfo) {
-                    super.onError(errorInfo);
-                    eventListener.onError(errorInfo.getErrorText());
-                }
-            });
+            Message[] messages = channel.getMessages().getMessages();
+            Log.d(TAG, "Number of messages syncronization is " + messages.length);
+            eventListener.onSuccess();
         }
         if (ipmVersion == "0.6.0") {
 //        ipmClientListener.waitForChannel(channelName, new IChatEventListener() {
@@ -163,6 +153,16 @@ class DumbOldIPMessagingClientListener implements IPMessagingClientListener {
         Log.d(TAG, "Client synchronized, status is " + synchronizationStatus.name());
     }
 
+    @Override
+    public void onChannelSynchronizationChange(Channel channel) {
+        Log.d(TAG, "onChannelSynchronizationChange, " + channel.getUniqueName());
+        if (channel.getUniqueName().equals(channelNameWaitFor)) {
+            channelListener.onSuccess();
+            channelListener = null;
+            channelNameWaitFor = "";
+        }
+    }
+
     public void waitForChannel(final String channelName, final IChatEventListener listener) {
         this.channelNameWaitFor = channelName;
         this.channelListener = listener;
@@ -186,21 +186,6 @@ class DumbOldIPMessagingClientListener implements IPMessagingClientListener {
     @Override
     public void onError(ErrorInfo errorInfo) {
 
-    }
-
-    @Override
-    public void onAttributesChange(String s) {
-
-    }
-
-    @Override
-    public void onChannelHistoryLoaded(Channel channel) {
-        Log.d(TAG, "Channel history loaded, " + channel.getUniqueName());
-        if (channel.getUniqueName().equals(channelNameWaitFor)) {
-            channelListener.onSuccess();
-            channelListener = null;
-            channelNameWaitFor = "";
-        }
     }
 
     @Override
