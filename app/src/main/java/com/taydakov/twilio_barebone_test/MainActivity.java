@@ -19,7 +19,8 @@ public class MainActivity extends AppCompatActivity {
         /* Test Twilio Chat API */
         Log.d(TAG, "Chat initialization...");
         // test old API: chatAPI = new OldTwilioChatApi(this, ""); // TODO: put Twilio token
-        chatAPI = new OldTwilioChatApi(this, "eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJIUzI1NiIsICJjdHkiOiAidHdpbGlvLWZwYTt2PTEifQ.eyJqdGkiOiAiU0swYjE0NGNiYjMyMjI2YTE3OTBhMmVkYzEwZjcxNGM5Ni0xNDYzNjA1NTkyIiwgInN1YiI6ICJBQzBkNDcwNjIyZDY3NTBkN2QyYjNjZGVhMjJhYjEyNDhhIiwgImdyYW50cyI6IHsiaXBfbWVzc2FnaW5nIjogeyJzZXJ2aWNlX3NpZCI6ICJJU2ZiOGZiOWYxMTNjMTRjMGFhNDg2MGYxM2I2NmU2ZWEzIiwgImVuZHBvaW50X2lkIjogIk9uZVVuaUFwcDo0OnRlc3RhcHAifSwgImlkZW50aXR5IjogNH0sICJleHAiOiAxNDYzNjg4MzkyLCAiaXNzIjogIlNLMGIxNDRjYmIzMjIyNmExNzkwYTJlZGMxMGY3MTRjOTYifQ.UBmLZ4hnBqh-qdNIdm5Wmyu6--V5Ui5etzi44zSiO-A"); // TODO: put Twilio token
+        // test new API: chatAPI = new NewTwilioChatApi(""); // TODO: put Twilio token
+        chatAPI = new NewTwilioChatApi("eyJjdHkiOiAidHdpbGlvLWZwYTt2PTEiLCAiYWxnIjogIkhTMjU2IiwgInR5cCI6ICJKV1QifQ.eyJleHAiOiAxNDYzODUyODgyLCAianRpIjogIlNLMGIxNDRjYmIzMjIyNmExNzkwYTJlZGMxMGY3MTRjOTYtMTQ2Mzc3MDA4MiIsICJncmFudHMiOiB7ImlwX21lc3NhZ2luZyI6IHsiZW5kcG9pbnRfaWQiOiAiT25lVW5pQXBwOjQ6dGVzdGFwcCIsICJzZXJ2aWNlX3NpZCI6ICJJU2ZiOGZiOWYxMTNjMTRjMGFhNDg2MGYxM2I2NmU2ZWEzIn0sICJpZGVudGl0eSI6IDR9LCAic3ViIjogIkFDMGQ0NzA2MjJkNjc1MGQ3ZDJiM2NkZWEyMmFiMTI0OGEiLCAiaXNzIjogIlNLMGIxNDRjYmIzMjIyNmExNzkwYTJlZGMxMGY3MTRjOTYifQ.7x2R68ee_NRQe-KJNztc4gjx6HvYxOQ_3cms163f4GA"); // TODO: put Twilio token
         chatAPI.initialize(new IChatEventListener() {
             @Override
             public void onSuccess() {

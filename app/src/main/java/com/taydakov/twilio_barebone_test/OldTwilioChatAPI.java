@@ -102,12 +102,14 @@ public class OldTwilioChatApi implements ChatApi {
     @Override
     public void retrieveMessages(final String channelName, final IChatEventListener eventListener) {
         if (ipmVersion == "0.7.0") {
+            // Twilio IPM SDK v0.7.0
             Channel channel = ipmClient.getChannels().getChannelByUniqueName(channelName);
             Message[] messages = channel.getMessages().getMessages();
-            Log.d(TAG, "Number of messages syncronization is " + messages.length);
+            Log.d(TAG, "Number of messages is " + messages.length);
             eventListener.onSuccess();
         }
         if (ipmVersion == "0.6.0") {
+            // Twilio IPM SDK v0.6.0
 //        ipmClientListener.waitForChannel(channelName, new IChatEventListener() {
 //            @Override
 //            public void onSuccess() {
@@ -163,6 +165,7 @@ class DumbOldIPMessagingClientListener implements IPMessagingClientListener {
         }
     }
 
+    // The method was used for Twilio SDK v0.6.0
     public void waitForChannel(final String channelName, final IChatEventListener listener) {
         this.channelNameWaitFor = channelName;
         this.channelListener = listener;
